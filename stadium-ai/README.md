@@ -40,6 +40,18 @@ npm.cmd run dev
 
 Open `http://localhost:3000`.
 
+## Vercel Deployment
+
+This repository stores the Next.js app in the `stadium-ai` folder. In Vercel, set:
+
+- Framework Preset: `Next.js`
+- Root Directory: `stadium-ai`
+- Install Command: `npm ci`
+- Build Command: `npm run build`
+- Output Directory: `.next`
+
+If Vercel is pointed at the repository root instead of `stadium-ai`, the deployment can show `404: NOT_FOUND` because Vercel is not building the Next app folder.
+
 ## Demo Credentials
 
 | Role | Email | Password | Route |

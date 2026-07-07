@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "StadiumAI - GenAI Matchday Operations Assistant",
   description: "Enhancing stadium operations and the overall tournament experience for fans, organizers, volunteers, and venue staff using Generative AI during the FIFA World Cup 2026.",
-  metadataBase: new URL("http://localhost:3000"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
   manifest: "/manifest.json",
   icons: {
     icon: "/file.svg",
