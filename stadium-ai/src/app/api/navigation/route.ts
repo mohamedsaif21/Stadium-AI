@@ -1,15 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
+import { NextRequest } from 'next/server';
 import { findRoute, searchZones, getZoneStatusMap } from '@/lib/navigation';
-
-const querySchema = z.object({
-  q: z.string().min(1, 'Query is required').max(500, 'Query too long'),
-  accessible: z.coerce.boolean().optional(),
-});
-
-const searchSchema = z.object({
-  search: z.string().min(1).max(500),
-});
+import { fail, ok, validationMessage } from '@/lib/api';
+import { navigationQuerySchema, navigationSearchSchema } from '@/lib/schemas';
 
 export async function GET(request: NextRequest) {
   try {
@@ -17,31 +9,26 @@ export async function GET(request: NextRequest) {
     const type = searchParams.get('type');
 
     if (type === 'zones') {
-      return NextResponse.json({ zones: getZoneStatusMap() });
+      return ok({ zones: getZoneStatusMap() });
     }
 
     const q = searchParams.get('q');
     if (q) {
-      const parsed = querySchema.safeParse({ q, accessible: searchParams.get('accessible') });
-      if (!parsed.success) {
-        return NextResponse.json({ error: parsed.error.issues[0]?.message || 'Invalid query' }, { status: 400 });
-      }
-      const route = findRoute(parsed.data.q);
-      return NextResponse.json({ route });
+      const parsed = navigationQuerySchema.parse({ q, accessible: searchParams.get('accessible') });
+      const route = findRoute(parsed.q);
+      return ok({ route });
     }
 
     const search = searchParams.get('search');
     if (search) {
-      const parsed = searchSchema.safeParse({ search });
-      if (!parsed.success) {
-        return NextResponse.json({ error: 'Invalid search' }, { status: 400 });
-      }
-      const results = searchZones(parsed.data.search);
-      return NextResponse.json({ results });
+      const parsed = navigationSearchSchema.parse({ search });
+      const results = searchZones(parsed.search);
+      return ok({ results });
     }
 
-    return NextResponse.json({ error: 'Provide q (query), search, or type=zones parameter' }, { status: 400 });
-  } catch {
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return fail('Provide q (query), search, or type=zones parameter', 400);
+  } catch (error) {
+    const message = validationMessage(error, 'Invalid navigation request');
+    return fail(message === 'Invalid navigation request' ? 'Internal server error' : message, message === 'Invalid navigation request' ? 500 : 400);
   }
 }

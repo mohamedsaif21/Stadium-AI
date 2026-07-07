@@ -29,7 +29,7 @@ export function Navbar({ user, onLogout }: NavbarProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center gap-2 group" aria-label="StadiumAI Home">
-            <div className="w-9 h-9 bg-gradient-to-tr from-blue-600 to-indigo-500 rounded-lg flex items-center justify-center shadow-md shadow-blue-500/20 transition-transform group-hover:scale-105">
+            <div className="w-9 h-9 bg-blue-600 rounded-md flex items-center justify-center shadow-md shadow-blue-500/20 transition-transform group-hover:scale-105 border border-blue-300/20">
               <span className="text-white font-extrabold text-sm tracking-wider">S</span>
             </div>
             <span className="text-white font-bold text-lg tracking-tight transition-colors group-hover:text-blue-300">StadiumAI</span>
@@ -57,7 +57,7 @@ export function Navbar({ user, onLogout }: NavbarProps) {
                 </Link>
                 <Link
                   href="/register"
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 hover:scale-[1.02] active:scale-[0.98] transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-md shadow-blue-600/20"
+                  className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-blue-700 hover:-translate-y-0.5 active:translate-y-0 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-md shadow-blue-600/20"
                 >
                   Get Started
                 </Link>

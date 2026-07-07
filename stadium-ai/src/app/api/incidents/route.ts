@@ -1,38 +1,20 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
+import { NextRequest } from 'next/server';
 import { MOCK_INCIDENTS, MOCK_SOP_RESPONSES } from '@/lib/mock-data';
 import { Incident } from '@/lib/types';
+import { fail, ok, parseJson, requireRole, validationMessage } from '@/lib/api';
+import { incidentCreateSchema, incidentUpdateSchema } from '@/lib/schemas';
 
 const incidents = [...MOCK_INCIDENTS];
 
-const createSchema = z.object({
-  type: z.enum(['lost_child', 'medical', 'ticket', 'crowd', 'accessibility', 'other']),
-  title: z.string().min(1, 'Title is required').max(200),
-  description: z.string().min(1, 'Description is required').max(1000),
-  location: z.string().min(1, 'Location is required').max(200),
-  severity: z.enum(['low', 'medium', 'high', 'critical']),
-  reportedBy: z.string().min(1),
-});
-
 export async function GET() {
-  return NextResponse.json({ incidents });
+  return ok({ incidents });
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const userRoleHeader = request.headers.get('x-user-role');
-    if (!userRoleHeader || (userRoleHeader !== 'volunteer' && userRoleHeader !== 'admin')) {
-      return NextResponse.json({ error: 'Unauthorized role' }, { status: 403 });
-    }
-
-    const body = await request.json();
-    const parsed = createSchema.safeParse(body);
-    
-    if (!parsed.success) {
-      return NextResponse.json({ error: parsed.error.issues[0]?.message || 'Invalid incident data' }, { status: 400 });
-    }
-
-    const { type, title, description, location, severity, reportedBy } = parsed.data;
+    const forbidden = requireRole(request, ['volunteer', 'admin']);
+    if (forbidden) return forbidden;
+    const { type, title, description, location, severity, reportedBy } = await parseJson(request, incidentCreateSchema);
     const aiSuggestedResponse = MOCK_SOP_RESPONSES[type] || 'Assess the situation and follow standard procedures.';
 
     const newIncident: Incident = {
@@ -49,37 +31,31 @@ export async function POST(request: NextRequest) {
     };
 
     incidents.unshift(newIncident);
-    return NextResponse.json({ incident: newIncident }, { status: 201 });
-  } catch {
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return ok({ incident: newIncident }, 201);
+  } catch (error) {
+    const message = validationMessage(error, 'Invalid incident data');
+    return fail(message === 'Invalid incident data' ? 'Internal server error' : message, message === 'Invalid incident data' ? 500 : 400);
   }
 }
 
 export async function PATCH(request: NextRequest) {
   try {
-    const userRoleHeader = request.headers.get('x-user-role');
-    if (!userRoleHeader || (userRoleHeader !== 'volunteer' && userRoleHeader !== 'admin')) {
-      return NextResponse.json({ error: 'Unauthorized role' }, { status: 403 });
-    }
-
-    const body = await request.json();
-    const { id, status, assignedTo } = body;
-    
-    if (!id) {
-      return NextResponse.json({ error: 'Incident ID is required' }, { status: 400 });
-    }
+    const forbidden = requireRole(request, ['volunteer', 'admin']);
+    if (forbidden) return forbidden;
+    const { id, status, assignedTo } = await parseJson(request, incidentUpdateSchema);
 
     const index = incidents.findIndex(i => i.id === id);
     if (index === -1) {
-      return NextResponse.json({ error: 'Incident not found' }, { status: 404 });
+      return fail('Incident not found', 404, 'NOT_FOUND');
     }
 
     if (status) incidents[index].status = status;
     if (assignedTo) incidents[index].assignedTo = assignedTo;
     if (status === 'resolved') incidents[index].resolvedAt = new Date();
 
-    return NextResponse.json({ incident: incidents[index] });
-  } catch {
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return ok({ incident: incidents[index] });
+  } catch (error) {
+    const message = validationMessage(error, 'Invalid incident data');
+    return fail(message === 'Invalid incident data' ? 'Internal server error' : message, message === 'Invalid incident data' ? 500 : 400);
   }
 }

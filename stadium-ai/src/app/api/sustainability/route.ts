@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
 import { getSustainabilityMetrics, getSustainabilityScore, getSustainabilitySuggestions } from '@/lib/sustainability';
+import { fail, ok } from '@/lib/api';
 
 export async function GET() {
   try {
@@ -7,12 +7,12 @@ export async function GET() {
     const score = getSustainabilityScore();
     const suggestions = await getSustainabilitySuggestions();
     
-    return NextResponse.json({
+    return ok({
       metrics,
       score,
       suggestions,
     });
   } catch {
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return fail('Internal server error', 500, 'INTERNAL_ERROR');
   }
 }

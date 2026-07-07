@@ -1,46 +1,41 @@
-# Testing Guide — StadiumAI
+# Testing Guide - StadiumAI
 
-StadiumAI utilizes a robust multi-tiered testing suite to guarantee layout integrity, operational correctness, accessibility support, and api validations.
+## Commands
 
----
+```bash
+npm run lint
+npm run build
+npm run test
+npm run test:e2e
+```
 
-## 📁 Testing Folder Structure
-*   `src/__tests__/` — Jest and React Testing Library unit tests.
-*   `e2e/` — Playwright integration and browser flow test specs.
+On Windows PowerShell, use `npm.cmd` if script execution policy blocks `npm.ps1`:
 
----
+```bash
+npm.cmd run lint
+npm.cmd run build
+npm.cmd run test
+npm.cmd run test:e2e
+```
 
-## 🧪 Automated Testing Breakdown
+## Coverage Areas
 
-### 1. Unit Tests (Jest + React Testing Library)
-Run `npm run test` to verify our 32 core test assertions:
+- Landing page rendering and primary navigation.
+- Login and mock auth redirects.
+- Role-specific dashboard access.
+- API validation schemas for chat, incidents, alerts, and updates.
+- Navigation search behavior.
+- Incident submission and status handling.
+- Admin dashboard rendering.
+- Accessibility controls.
+- AI safety fallback for prompt-injection attempts.
+- Playwright flows for fan, volunteer, admin, and landing pages.
 
-| Test Suite | File Path | Focus Area |
-| :--- | :--- | :--- |
-| **Landing UI** | `landing.test.tsx` | Hero grids, CTA redirections, and login cards. |
-| **Login UI** | `login.test.tsx` | Standard input forms and Demo Quick Login buttons. |
-| **Navigation Rules** | `navigation.test.ts` | Path computations, time estimations, accessibility routes. |
-| **Incident Validators** | `incidents.test.ts` | Local storage state tracking, SOP lookup tables. |
-| **API Validators** | `api-validation.test.ts` | Zod schema checks for chat inputs and alert structures. |
-| **Admin Controls** | `admin-dashboard.test.tsx` | StatCard layouts and interactive heatmap rendering. |
-| **Accessibility Toggles** | `accessibility.test.tsx` | High contrast overlays and scaling properties. |
-| **Auth Logic** | `auth.test.ts` | Login validations and mock-mode state routing. |
+## Latest Verification
 
----
+- `npm.cmd run lint`: passed.
+- `npm.cmd run build`: passed. Next emitted a native Windows SWC warning and used its fallback path.
+- `npm.cmd run test -- --runInBand`: passed, 9 suites and 35 tests.
+- `npm.cmd run test:e2e`: passed, 11 Playwright tests.
 
-### 2. Integration / E2E Tests (Playwright)
-Run `npm run test:e2e` to trigger browser automation across Chromium:
-
-*   `landing.spec.ts` — Verifies user journey landing to sign-in navigation.
-*   `fan.spec.ts` — Tests dashboard navigation routing, emergency triggers, and chat loads.
-*   `volunteer.spec.ts` — Evaluates interactive SOP cards, task updates, and incident forms.
-*   `admin.spec.ts` — Verifies live alerts creation, simulator triggers, and heatmap.
-
----
-
-## 📋 Manual Pitch Day Verification Checklist
-
-- [x] **Redirection**: Quick Login accounts direct to role-specific layouts correctly.
-- [x] **Accessibility**: Toggle controls increase font sizes and highlight buttons instantly.
-- [x] **Simulation**: Admin simulator triggers inject incidents and immediately update lists.
-- [x] **Emergency**: Emergency assistance buttons show red alerts and trigger notifications.
+The Playwright config starts the dev server automatically.

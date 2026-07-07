@@ -1,69 +1,84 @@
-# Hack2Skill Project Report — StadiumAI
+# StadiumAI Project Report
 
-## 📄 Abstract
+## Project Summary
 
-StadiumAI is a full-stack, Generative AI-powered matchday operations dashboard and fan assistant customized for the FIFA World Cup 2026. It integrates operational command controls (for admins), Standard Operating Procedure dispatches (for volunteers), and navigation aids (for fans) in a unified SaaS. By leveraging fast Google Gemini 1.5 Flash GenAI models, responsive maps, and comprehensive accessibility controls, StadiumAI transforms how large-scale sporting tournaments manage venue safety and visitor experience.
+StadiumAI is a GenAI Matchday Operations Assistant for FIFA World Cup 2026 stadium operations. It supports fans, volunteers, and administrators with safe AI guidance, navigation search, incident workflows, alerts, crowd heatmap telemetry, and sustainability insights.
 
----
+## Improvements Completed
 
-## 🎯 Problem Statement Alignment
+### Code Quality
 
-With the expansion of the FIFA World Cup 2026 to 48 teams across 104 matches, stadium organizers face unprecedented bottlenecks:
-1.  **Crowd Congestion**: Delays at entry gates, ticket turnstiles, and transport stands leading to safety hazards.
-2.  **Volunteer Gaps**: Thousands of volunteers requiring training and instant access to Standard Operating Procedures (SOPs).
-3.  **Accessibility Barriers**: The need for wheelchair routes, text scaling, high-contrast layouts, and translation facilities for international fans.
-4.  **Operational Command**: The absence of unified dashboards overlaying zone capacity, thermal heat stress, and guard positions.
+- Added shared Zod schemas in `src/lib/schemas.ts`.
+- Added shared API helpers in `src/lib/api.ts` for success responses, errors, JSON parsing, role checks, and rate limiting.
+- Added environment helpers in `src/lib/env.ts`.
+- Added reusable UI primitives in `src/components/ui.tsx`.
+- Replaced duplicated inline validation and rate-limit logic in API routes.
+- Preserved existing endpoint routes and response fields while adding a consistent `ok` flag.
+- Fixed the admin simulator incident payload so it satisfies validated API input.
 
-**StadiumAI resolves these challenges through targeted, role-based dashboards:**
-*   **Admins** view live heatmap overlays and run simulated crisis scenarios.
-*   **Volunteers** log incidents and retrieve AI responses matched to official SOP rules.
-*   **Fans** search routes, translate languages, and request wheelchair-compliant paths.
+### Security
 
----
+- Removed committed sample secrets from `.env.example`.
+- Added safe AI provider fallback and prompt-injection refusal checks.
+- Sanitized AI provider output before returning it to the client.
+- Standardized secure error responses without stack traces.
+- Enforced role checks on protected write APIs.
+- Kept demo/mock mode operational when Supabase or AI keys are missing.
 
-## 📋 Feature Checklist
+### UI/UX and Accessibility
 
-- [x] **Conversational AI Assistant** (Gemini 1.5 Flash system instruction integration)
-- [x] **Multi-Layer Stadium Map** (Live crowd, temperature stress, and staff coordinates)
-- [x] **Judge Scenario Simulator** (On-demand congestion and medical incident injectors)
-- [x] **Volunteer Dispatch System** (Incident reports, live logs, and AI resolution guidance)
-- [x] **Dynamic Route Nav** (Step-by-step navigation instructions with time estimates)
-- [x] **WCAG 2.1 Accessibility panel** (Large text, contrast, and wheelchair paths)
-- [x] **Sustainability metrics tracker** (Water, energy, transit, and green scoring)
-- [x] **Security authorization layer** (Strict Zod validations, role middleware, XSS sanitization)
+- Preserved the premium navy dashboard style, clear focus rings, labeled forms, loading states, and empty states already present in the app.
+- Added reusable `Button`, `Input`, `Badge`, and `EmptyState` primitives for continued UI consistency.
+- Kept mobile-first responsive grids for fan, volunteer, and admin dashboards.
+- Maintained safe chat rendering without raw HTML injection.
 
----
+### Testing
 
-## 📋 Judging Parameter Checklist
+- Updated API validation tests to use the production schemas.
+- Added an AI safety test for prompt-injection fallback behavior.
+- Verified lint, build, Jest, and Playwright E2E suites.
 
-| Judging Criteria | Implementation in StadiumAI | Status |
-| :--- | :--- | :--- |
-| **Problem Alignment** | Addresses crowds, transit, multilingual support, and operations tracking. | **10 / 10** ✅ |
-| **Innovation** | Interactive telemetry layers and real-time simulator controls. | **10 / 10** ✅ |
-| **GenAI Integration** | Built using modern `gemini-1.5-flash` model-level system instruction sets. | **10 / 10** ✅ |
-| **Security & Auditing** | Escape parsers for XSS safety, strict API routing validation, and auth guards. | **10 / 10** ✅ |
-| **Accessibility** | High contrast, scaling, keyboard tab routing, and ARIA labels. | **10 / 10** ✅ |
-| **Testing Robustness** | 100% test completion across both unit (Jest) and integration (Playwright) suites. | **10 / 10** ✅ |
+## Demo Credentials
 
----
+| Role | Email | Password |
+| --- | --- | --- |
+| Fan | `fan@stadiumai.demo` | `password123` |
+| Volunteer | `volunteer@stadiumai.demo` | `password123` |
+| Admin | `admin@stadiumai.demo` | `password123` |
 
-## ⚠️ Known Assumptions, Limitations & Scope
+## Environment Variables
 
-### Known Assumptions:
-1.  **Network Connectivity**: The application assumes active standard internet access for Google Generative AI API resolution, falling back to rule-based mock matching in offline environments.
-2.  **Role Classification**: Users belong to one of three roles: `fan`, `volunteer`, or `admin`, with security middleware enforcing path routes.
+Use `.env.example` as a safe template. Leave values blank to run in demo/mock mode.
 
-### Project Limitations:
-1.  **Mock Database Fallback**: The client defaults to high-fidelity in-memory/localStorage mock arrays when database keys are missing.
-2.  **Sensory Integration**: Stadium heatmap coordinates represent live simulated sensors rather than continuous IoT device streams.
+```bash
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+GENAI_API_KEY=
+GENAI_PROVIDER=openai
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
 
-### Future Scope:
-1.  **WebSocket Sync**: Integrating live dynamic socket updates to show gate counts without dashboard refreshes.
-2.  **Speech Translation**: Supporting voice-activated input and translations for fan convenience.
-3.  **Predictive Modeling**: Running historical ML models to predict gate congestion 30 minutes before match kickoff.
+## Verification Commands
 
----
+```bash
+npm run lint
+npm run build
+npm run test
+npm run test:e2e
+```
 
-## 🏁 Conclusion
+PowerShell fallback:
 
-StadiumAI is a robust, production-ready SaaS for tournament operations. Combining strict type checking, robust automated test suites, accessible component features, and state-of-the-art GenAI support, StadiumAI represents the future of safe and enjoyable matchday experiences.
+```bash
+npm.cmd run lint
+npm.cmd run build
+npm.cmd run test
+npm.cmd run test:e2e
+```
+
+## Remaining Production Hardening
+
+- Replace demo role headers with verified Supabase session claims.
+- Add persistent storage for incidents and alerts.
+- Move in-memory rate limiting to Redis or another shared store for multi-instance deployments.

@@ -6,45 +6,41 @@ interface StatCardProps {
   color?: 'blue' | 'red' | 'green' | 'purple' | 'yellow';
 }
 
-const colorClasses: Record<string, { text: string; icon: string }> = {
-  blue: { text: 'text-blue-600', icon: 'text-blue-200' },
-  red: { text: 'text-red-600', icon: 'text-red-200' },
-  green: { text: 'text-green-600', icon: 'text-green-200' },
-  purple: { text: 'text-purple-600', icon: 'text-purple-200' },
-  yellow: { text: 'text-yellow-600', icon: 'text-yellow-200' },
+const colorClasses: Record<string, { text: string }> = {
+  blue: { text: 'text-blue-600' },
+  red: { text: 'text-red-600' },
+  green: { text: 'text-green-600' },
+  purple: { text: 'text-blue-700' },
+  yellow: { text: 'text-yellow-600' },
+};
+
+const bgSubtle = {
+  blue: 'bg-blue-50/80 border-blue-100',
+  red: 'bg-red-50/80 border-red-100',
+  green: 'bg-green-50/80 border-green-100',
+  purple: 'bg-blue-50/80 border-blue-100',
+  yellow: 'bg-yellow-50/80 border-yellow-100',
 };
 
 export function StatCard({ label, value, icon, trend, color = 'blue' }: StatCardProps) {
-  const trendColors = { up: 'text-green-600 font-semibold', down: 'text-red-600 font-semibold', stable: 'text-gray-400 font-medium' };
+  const trendColors = { up: 'text-green-700', down: 'text-red-700', stable: 'text-gray-500' };
   const styles = colorClasses[color] || colorClasses.blue;
 
-  const bgSubtle = {
-    blue: 'bg-blue-50/80',
-    red: 'bg-red-50/80',
-    green: 'bg-green-50/80',
-    purple: 'bg-purple-50/80',
-    yellow: 'bg-yellow-50/80',
-  }[color];
-
   return (
-    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover-lift">
-      <div className="flex items-start justify-between">
+    <div className="ops-surface rounded-lg p-5 hover-lift">
+      <div className="flex items-start justify-between gap-4">
         <div className="space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">{label}</p>
-          <p className={`text-3xl font-bold tracking-tight ${styles.text}`}>{value}</p>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">{label}</p>
+          <p className={`text-3xl font-black tracking-tight ${styles.text}`}>{value}</p>
           {trend && (
-            <span className={`text-xs ${trendColors[trend]} flex items-center gap-1 mt-1`}>
-              {trend === 'up' && <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-ping" />}
-              {trend === 'down' && <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />}
-              {trend === 'up' && '↑'}
-              {trend === 'down' && '↓'}
-              {trend === 'stable' && '→'}
+            <span className={`text-xs font-semibold ${trendColors[trend]} flex items-center gap-1 mt-1`}>
+              <span className="w-1.5 h-1.5 rounded-full bg-current" />
               {trend === 'up' ? 'Increasing' : trend === 'down' ? 'Decreasing' : 'Stable'}
             </span>
           )}
         </div>
         {icon && (
-          <div className={`w-10 h-10 rounded-lg flex items-center justify-center shadow-inner ${bgSubtle} ${styles.text}`}>
+          <div className={`w-10 h-10 rounded-md flex items-center justify-center border shadow-inner ${bgSubtle[color]} ${styles.text}`}>
             {icon}
           </div>
         )}

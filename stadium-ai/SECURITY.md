@@ -1,48 +1,41 @@
-# Security Guide — StadiumAI
+# Security Guide - StadiumAI
 
-This document outlines the security architecture, data validation protocols, and defensive measures implemented in StadiumAI.
+StadiumAI is designed to run safely in demo/mock mode while supporting Supabase and AI providers when server-side environment variables are configured.
 
----
+## Security Measures
 
-## 🛡️ Security Architecture Overview
+- Secrets are not committed. `.env.example` contains placeholders only.
+- Server API keys such as `GENAI_API_KEY` and `SUPABASE_SERVICE_ROLE_KEY` must never be exposed to client code.
+- API handlers use shared response helpers in `src/lib/api.ts` so errors are consistent and do not return stack traces.
+- API inputs are validated with shared Zod schemas in `src/lib/schemas.ts`.
+- Protected write actions enforce role checks for `fan`, `volunteer`, and `admin` using request role headers in demo mode.
+- AI calls use role-specific system prompts, prompt-injection refusal checks, provider fallback, and text sanitization before responses reach the UI.
+- Chat rendering avoids `dangerouslySetInnerHTML`; React escapes user and AI text by default.
+- AI chat and admin decision-support endpoints include in-memory rate limiting for demo deployment.
 
+## Environment Variables
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+GENAI_API_KEY=
+GENAI_PROVIDER=openai
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
-[Client App] ──( HTTPS )──> [Role Middleware] ──> [Zod Validation] ──> [AI System Prompts / DB]
-```
 
----
+If Supabase or AI keys are missing, StadiumAI stays in mock mode with safe local demo users and deterministic AI fallback responses.
 
-## 🔑 Core Security Measures
+## Demo Auth Model
 
-### 1. Environment Variable Protection
-*   All API secrets and private credentials (e.g. `GENAI_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`) are loaded on the server and are strictly excluded from git tracking via `.gitignore`.
-*   Public environment variables prefix with `NEXT_PUBLIC_` to explicitly declare safe client exposure.
+The current hackathon demo uses client-stored mock users plus server-side route role checks. This is acceptable for a judged prototype, but production should replace request role headers with verified Supabase sessions, server-side claims, and database row-level security.
 
-### 2. Strict Input Validation (Zod Schemas)
-Every server-side route processes incoming payloads through strict schemas:
-```typescript
-// Example from src/app/api/ai/chat/route.ts
-const chatSchema = zod.object({
-  message: zod.string().min(1).max(1000),
-  role: zod.enum(['fan', 'volunteer', 'admin']),
-});
-```
-This blocks SQL injections, script payloads, and overflows before they hit our database or AI provider.
+## Security Checklist
 
-### 3. Server-Side Role Middleware
-*   Routes check credentials and evaluate active roles (`fan` vs `volunteer` vs `admin`) in the API header requests (`X-User-Role`).
-*   Unauthorized attempts to POST alerts or access admin endpoints return an immediate `HTTP 403 Forbidden` response.
-
-### 4. Chatbot XSS Mitigation
-*   Chat message elements inside [Chatbot.tsx](file:///d:/Projects/FIFA/stadium-ai/src/components/Chatbot.tsx) do NOT use `dangerouslySetInnerHTML`.
-*   We use a custom mapping tokenizer (`renderInlineStyles`) that splits text on inline bold markers (`**`) and translates them to safe React JSX structures (`<strong>`), automatically escaping script tags and brackets.
-
----
-
-## 📋 Security Checklist
-
-- [x] **Secrets Separation**: Zero secrets in source code files.
-- [x] **Strict API Schemas**: Zod validation maps all incoming request parameters.
-- [x] **Middleware Authorization**: Checks roles in server request headers.
-- [x] **XSS Safe rendering**: Chat elements escape raw HTML output automatically.
-- [x] **GenAI Guardrails**: System instructions define conversational boundaries.
+- [x] Removed exposed sample secrets from `.env.example`.
+- [x] Added centralized API error responses.
+- [x] Added shared Zod schemas for chat, alerts, incidents, navigation, and decision support.
+- [x] Added basic rate limiting to AI endpoints.
+- [x] Added prompt-injection refusal behavior.
+- [x] Sanitized AI provider text responses.
+- [x] Preserved safe mock mode when external services are unavailable.

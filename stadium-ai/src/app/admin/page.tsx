@@ -94,7 +94,7 @@ export default function AdminDashboard() {
             type: 'medical',
             severity: 'high',
             description: 'Fan requires assistance due to suspected heat exhaustion near kiosk 3.',
-            createdBy: 'Simulator',
+            reportedBy: user?.id || 'Simulator',
           }),
         });
       } else if (type === 'power') {
@@ -107,7 +107,7 @@ export default function AdminDashboard() {
             type: 'other',
             severity: 'critical',
             description: 'Backup generator failure in stand 2 sector G. Maintenance required.',
-            createdBy: 'Simulator',
+            reportedBy: user?.id || 'Simulator',
           }),
         });
       } else if (type === 'post_match') {
@@ -146,19 +146,17 @@ export default function AdminDashboard() {
     <ProtectedRoute role="admin">
       <Navbar user={user || undefined} onLogout={logout} />
       <main className="flex-1 bg-gray-50">
-        <div className="bg-gradient-to-r from-purple-950 via-purple-900 to-indigo-950 text-white border-b border-purple-800/40 relative overflow-hidden">
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-0 right-0 w-72 h-72 bg-purple-500 rounded-full blur-3xl animate-pulse-slow" />
-          </div>
+        <div className="dashboard-band text-white border-b border-navy-800/40">
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <p className="ops-kicker mb-3">Operations command deck</p>
             <h1 className="text-3xl font-extrabold mb-1 tracking-tight">Admin Operations Dashboard</h1>
-            <p className="text-purple-200/80 text-sm font-light">Welcome, {user?.name || 'Admin'}! Real-time stadium operations & GenAI telemetry at your fingertips.</p>
+            <p className="text-blue-200/85 text-sm font-medium">Welcome, {user?.name || 'Admin'}. Monitor crowd flow, incidents, alerts, and sustainability signals.</p>
           </div>
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Judge Demo Simulator Panel */}
-          <div className="bg-gradient-to-r from-indigo-900 via-slate-900 to-blue-900 text-white rounded-2xl p-5 mb-8 shadow-md border border-indigo-700/40 relative overflow-hidden">
+          <div className="ops-panel-dark text-white rounded-lg p-5 mb-8 relative overflow-hidden">
             <div className="flex items-center justify-between flex-wrap gap-3">
               <div>
                 <h2 className="text-sm font-bold uppercase tracking-wider flex items-center gap-1.5 text-indigo-300">
@@ -169,25 +167,25 @@ export default function AdminDashboard() {
               <div className="flex flex-wrap gap-2.5">
                 <button
                   onClick={() => triggerSimulation('crowd_surge')}
-                  className="bg-white/10 hover:bg-white/20 text-white text-xs font-semibold px-3 py-2 rounded-xl transition-all hover:scale-105 active:scale-95 border border-white/10"
+                  className="bg-white/10 hover:bg-white/20 text-white text-xs font-semibold px-3 py-2 rounded-md transition-all hover:-translate-y-0.5 active:translate-y-0 border border-white/10"
                 >
                   🚨 Gate B Surge
                 </button>
                 <button
                   onClick={() => triggerSimulation('medical')}
-                  className="bg-white/10 hover:bg-white/20 text-white text-xs font-semibold px-3 py-2 rounded-xl transition-all hover:scale-105 active:scale-95 border border-white/10"
+                  className="bg-white/10 hover:bg-white/20 text-white text-xs font-semibold px-3 py-2 rounded-md transition-all hover:-translate-y-0.5 active:translate-y-0 border border-white/10"
                 >
                   🚑 Food Court Heat
                 </button>
                 <button
                   onClick={() => triggerSimulation('power')}
-                  className="bg-white/10 hover:bg-white/20 text-white text-xs font-semibold px-3 py-2 rounded-xl transition-all hover:scale-105 active:scale-95 border border-white/10"
+                  className="bg-white/10 hover:bg-white/20 text-white text-xs font-semibold px-3 py-2 rounded-md transition-all hover:-translate-y-0.5 active:translate-y-0 border border-white/10"
                 >
                   🔌 Stand 2 Power Cut
                 </button>
                 <button
                   onClick={() => triggerSimulation('post_match')}
-                  className="bg-white/10 hover:bg-white/20 text-white text-xs font-semibold px-3 py-2 rounded-xl transition-all hover:scale-105 active:scale-95 border border-white/10"
+                  className="bg-white/10 hover:bg-white/20 text-white text-xs font-semibold px-3 py-2 rounded-md transition-all hover:-translate-y-0.5 active:translate-y-0 border border-white/10"
                 >
                   🚇 Post-Match Exit
                 </button>

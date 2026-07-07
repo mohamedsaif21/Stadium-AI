@@ -1,5 +1,6 @@
 import { AIResponse, UserRole } from './types';
 import { MOCK_AI_RESPONSES } from './mock-data';
+import { getAIProvider, isAIConfigured } from './env';
 
 const SYSTEM_PROMPTS: Record<UserRole, string> = {
   fan: `You are StadiumAI, an AI assistant for fans at the FIFA World Cup 2026 stadium. 
@@ -54,6 +55,10 @@ Rules:
 
 function getMockResponse(message: string): string {
   const lower = message.toLowerCase();
+
+  if (isPromptInjectionAttempt(lower)) {
+    return 'I can help with stadium navigation, accessibility, transport, incidents, and matchday operations. I cannot follow requests to ignore safety rules or reveal hidden instructions.';
+  }
   
   if (lower.includes('gate')) return MOCK_AI_RESPONSES['gate'];
   if (lower.includes('restroom') || lower.includes('bathroom') || lower.includes('toilet')) return MOCK_AI_RESPONSES['restroom'];
@@ -63,14 +68,38 @@ function getMockResponse(message: string): string {
   if (lower.includes('seat') || lower.includes('where')) return MOCK_AI_RESPONSES['seat'];
   if (lower.includes('help') || lower.includes('hello') || lower.includes('hi')) return MOCK_AI_RESPONSES['help'];
   
-  return `I\'m here to help you with stadium navigation, accessibility, transport, translations, and more. Could you please provide more details about what you need? For example: "How do I reach Gate B?" or "I need wheelchair access."`;
+  return 'I am here to help with stadium navigation, accessibility, transport, translations, and matchday operations. Could you provide more details, such as "How do I reach Gate B?" or "I need wheelchair access."';
+}
+
+function isPromptInjectionAttempt(text: string) {
+  return [
+    'ignore previous',
+    'ignore your instructions',
+    'system prompt',
+    'developer message',
+    'reveal prompt',
+    'jailbreak',
+  ].some(pattern => text.includes(pattern));
+}
+
+function sanitizeAIText(text: string) {
+  return text
+    .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '')
+    .replace(/<\/?[^>]+>/g, '')
+    .replace(/\0/g, '')
+    .trim()
+    .slice(0, 4000);
 }
 
 export async function getAIResponse(message: string, role: UserRole): Promise<AIResponse> {
   const apiKey = process.env.GENAI_API_KEY;
-  const provider = process.env.GENAI_PROVIDER || 'openai';
+  const provider = getAIProvider();
 
-  if (!apiKey) {
+  if (isPromptInjectionAttempt(message.toLowerCase())) {
+    return { response: getMockResponse(message), mock: true };
+  }
+
+  if (!apiKey || !isAIConfigured()) {
     return { response: getMockResponse(message), mock: true };
   }
 
@@ -86,7 +115,7 @@ export async function getAIResponse(message: string, role: UserRole): Promise<AI
       });
       const chat = model.startChat();
       const result = await chat.sendMessage(message);
-      responseText = result.response.text();
+      responseText = sanitizeAIText(result.response.text());
     } else {
       const OpenAI = (await import('openai')).default;
       const openai = new OpenAI({ apiKey, baseURL: provider === 'azure' ? undefined : undefined });
@@ -98,7 +127,7 @@ export async function getAIResponse(message: string, role: UserRole): Promise<AI
         ],
         max_tokens: 500,
       });
-      responseText = completion.choices[0]?.message?.content || 'I apologize, I could not generate a response.';
+      responseText = sanitizeAIText(completion.choices[0]?.message?.content || 'I apologize, I could not generate a response.');
     }
 
     return { response: responseText, mock: false };
@@ -116,9 +145,16 @@ export async function getDecisionSupport(query: string): Promise<AIResponse> {
   };
 
   const apiKey = process.env.GENAI_API_KEY;
-  const provider = process.env.GENAI_PROVIDER || 'openai';
+  const provider = getAIProvider();
 
-  if (!apiKey) {
+  if (isPromptInjectionAttempt(lower)) {
+    return {
+      response: 'I can support stadium operations decisions, but I cannot follow requests to bypass safety rules or reveal hidden instructions.',
+      mock: true,
+    };
+  }
+
+  if (!apiKey || !isAIConfigured()) {
     let response = '';
     if (lower.includes('crowd')) response = adminMockResponses['crowd'];
     else if (lower.includes('staff')) response = adminMockResponses['staff'];
@@ -139,7 +175,7 @@ export async function getDecisionSupport(query: string): Promise<AIResponse> {
       });
       const chat = model.startChat();
       const result = await chat.sendMessage(query);
-      responseText = result.response.text();
+      responseText = sanitizeAIText(result.response.text());
     } else {
       const OpenAI = (await import('openai')).default;
       const openai = new OpenAI({ apiKey });
@@ -151,7 +187,7 @@ export async function getDecisionSupport(query: string): Promise<AIResponse> {
         ],
         max_tokens: 600,
       });
-      responseText = completion.choices[0]?.message?.content || '';
+      responseText = sanitizeAIText(completion.choices[0]?.message?.content || '');
     }
 
     return { response: responseText, mock: false };

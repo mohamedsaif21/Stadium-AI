@@ -1,7 +1,8 @@
 import { User, UserRole } from './types';
 import { MOCK_USERS, MOCK_PASSWORD } from './mock-data';
+import { isSupabaseConfigured } from './env';
 
-const MOCK_MODE = !process.env.NEXT_PUBLIC_SUPABASE_URL;
+const MOCK_MODE = !isSupabaseConfigured();
 
 interface AuthResult {
   user: User | null;
@@ -63,9 +64,12 @@ export async function registerUser(email: string, password: string, name: string
 
 export function getRedirectPath(role: UserRole): string {
   switch (role) {
-    case 'fan': return '/fan';
-    case 'volunteer': return '/volunteer';
-    case 'admin': return '/admin';
+    case 'fan':
+      return '/fan';
+    case 'volunteer':
+      return '/volunteer';
+    case 'admin':
+      return '/admin';
   }
 }
 
