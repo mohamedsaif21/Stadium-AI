@@ -45,7 +45,10 @@ export default function RootLayout({
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         <AccessibilityProvider>
-          {children}
+          <a href="#main-content" className="skip-link">Skip to main content</a>
+          <div id="main-content" className="contents">
+            {children}
+          </div>
           <AccessibilityBar />
         </AccessibilityProvider>
       </body>

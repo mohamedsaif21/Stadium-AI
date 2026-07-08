@@ -1,11 +1,13 @@
 import { NextRequest } from 'next/server';
 import { getAIResponse } from '@/lib/ai';
-import { fail, ok, parseJson, rateLimit, validationMessage } from '@/lib/api';
+import { fail, ok, parseJson, rateLimit, requireSameOrigin, validationMessage } from '@/lib/api';
 import { chatRequestSchema } from '@/lib/schemas';
 
 export async function POST(request: NextRequest) {
   const limited = rateLimit(request, 'ai-chat', 20);
   if (limited) return limited;
+  const invalidOrigin = requireSameOrigin(request);
+  if (invalidOrigin) return invalidOrigin;
 
   try {
     const userRoleHeader = request.headers.get('x-user-role');

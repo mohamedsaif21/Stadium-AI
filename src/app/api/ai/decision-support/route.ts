@@ -1,11 +1,13 @@
 import { NextRequest } from 'next/server';
 import { getDecisionSupport } from '@/lib/ai';
-import { fail, ok, parseJson, rateLimit, requireRole, validationMessage } from '@/lib/api';
+import { fail, ok, parseJson, rateLimit, requireRole, requireSameOrigin, validationMessage } from '@/lib/api';
 import { decisionSupportSchema } from '@/lib/schemas';
 
 export async function POST(request: NextRequest) {
   const limited = rateLimit(request, 'decision-support', 10);
   if (limited) return limited;
+  const invalidOrigin = requireSameOrigin(request);
+  if (invalidOrigin) return invalidOrigin;
 
   try {
     const forbidden = requireRole(request, ['admin']);

@@ -1,9 +1,12 @@
 import { NextRequest } from 'next/server';
 import { findRoute, searchZones, getZoneStatusMap } from '@/lib/navigation';
-import { fail, ok, validationMessage } from '@/lib/api';
+import { fail, ok, rateLimit, validationMessage } from '@/lib/api';
 import { navigationQuerySchema, navigationSearchSchema } from '@/lib/schemas';
 
 export async function GET(request: NextRequest) {
+  const limited = rateLimit(request, 'navigation-read', 90);
+  if (limited) return limited;
+
   try {
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type');

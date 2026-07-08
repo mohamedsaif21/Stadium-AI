@@ -1,16 +1,25 @@
 import { NextRequest } from 'next/server';
 import { MOCK_INCIDENTS, MOCK_SOP_RESPONSES } from '@/lib/mock-data';
 import { Incident } from '@/lib/types';
-import { fail, ok, parseJson, requireRole, validationMessage } from '@/lib/api';
+import { fail, ok, parseJson, rateLimit, requireRole, requireSameOrigin, validationMessage } from '@/lib/api';
 import { incidentCreateSchema, incidentUpdateSchema } from '@/lib/schemas';
 
 const incidents = [...MOCK_INCIDENTS];
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const limited = rateLimit(request, 'incidents-read', 60);
+  if (limited) return limited;
+  const forbidden = requireRole(request, ['volunteer', 'admin']);
+  if (forbidden) return forbidden;
   return ok({ incidents });
 }
 
 export async function POST(request: NextRequest) {
+  const limited = rateLimit(request, 'incidents-write', 20);
+  if (limited) return limited;
+  const invalidOrigin = requireSameOrigin(request);
+  if (invalidOrigin) return invalidOrigin;
+
   try {
     const forbidden = requireRole(request, ['volunteer', 'admin']);
     if (forbidden) return forbidden;
@@ -39,6 +48,11 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
+  const limited = rateLimit(request, 'incidents-update', 30);
+  if (limited) return limited;
+  const invalidOrigin = requireSameOrigin(request);
+  if (invalidOrigin) return invalidOrigin;
+
   try {
     const forbidden = requireRole(request, ['volunteer', 'admin']);
     if (forbidden) return forbidden;

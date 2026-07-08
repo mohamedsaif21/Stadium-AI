@@ -4,6 +4,7 @@ import {
   incidentCreateSchema,
   incidentUpdateSchema,
 } from '@/lib/schemas';
+import { isSameOrigin } from '@/lib/security';
 
 describe('API Input Validation', () => {
   it('validates chat request', () => {
@@ -55,5 +56,17 @@ describe('API Input Validation', () => {
       severity: 'warning',
       createdBy: 'admin-1',
     }).success).toBe(true);
+  });
+
+  it('rejects cross-origin mutating API requests', () => {
+    const headers = {
+      get: (key: string) => (
+        key === 'host' ? 'localhost:3000' :
+        key === 'origin' ? 'https://attacker.example' :
+        null
+      ),
+    };
+
+    expect(isSameOrigin(headers)).toBe(false);
   });
 });

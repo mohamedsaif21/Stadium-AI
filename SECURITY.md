@@ -8,10 +8,13 @@ StadiumAI is designed to run safely in demo/mock mode while supporting Supabase 
 - Server API keys such as `GENAI_API_KEY` and `SUPABASE_SERVICE_ROLE_KEY` must never be exposed to client code.
 - API handlers use shared response helpers in `src/lib/api.ts` so errors are consistent and do not return stack traces.
 - API inputs are validated with shared Zod schemas in `src/lib/schemas.ts`.
-- Protected write actions enforce role checks for `fan`, `volunteer`, and `admin` using request role headers in demo mode.
+- Protected operational reads and writes enforce role checks for `fan`, `volunteer`, and `admin` using request role headers in demo mode.
+- Mutating API routes reject cross-origin browser requests when an `Origin` header is present.
+- Global response headers disable framing, content sniffing, excess browser permissions, and unsupported cross-origin framing.
 - AI calls use role-specific system prompts, prompt-injection refusal checks, provider fallback, and text sanitization before responses reach the UI.
 - Chat rendering avoids `dangerouslySetInnerHTML`; React escapes user and AI text by default.
-- AI chat and admin decision-support endpoints include in-memory rate limiting for demo deployment.
+- AI chat, decision-support, navigation, incident, alert, and sustainability endpoints include in-memory rate limiting for demo deployment.
+- Client-stored demo users are shape-checked before dashboards trust the role.
 
 ## Environment Variables
 
@@ -36,6 +39,11 @@ The current hackathon demo uses client-stored mock users plus server-side route 
 - [x] Added centralized API error responses.
 - [x] Added shared Zod schemas for chat, alerts, incidents, navigation, and decision support.
 - [x] Added basic rate limiting to AI endpoints.
+- [x] Expanded rate limiting to operational data endpoints.
+- [x] Added same-origin checks to mutating endpoints.
+- [x] Added global security headers in Next config.
+- [x] Enabled strict TypeScript build validation.
+- [x] Added runtime validation for stored demo auth objects.
 - [x] Added prompt-injection refusal behavior.
 - [x] Sanitized AI provider text responses.
 - [x] Preserved safe mock mode when external services are unavailable.

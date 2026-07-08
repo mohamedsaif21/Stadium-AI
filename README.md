@@ -77,17 +77,22 @@ Leave Supabase and AI keys blank for local demo/mock mode. Never commit real key
 
 - Centralized API response and error helpers.
 - Zod validation for chat, alerts, incidents, incident updates, navigation, and decision support.
-- Role checks on protected API actions.
-- Basic in-memory rate limiting for AI endpoints.
+- Role checks on protected operational API reads and writes.
+- Same-origin checks on mutating API routes.
+- Security headers from `next.config.ts`, including CSP, frame blocking, content sniffing protection, and referrer policy.
+- Basic in-memory rate limiting for AI, navigation, incident, alert, and sustainability endpoints.
 - Prompt-injection refusal checks and AI text sanitization.
 - Safe React rendering without `dangerouslySetInnerHTML`.
+- Runtime validation for client-stored demo user objects.
 
 ## Code Quality Improvements
 
 - Shared schemas in `src/lib/schemas.ts`.
 - Shared API helpers in `src/lib/api.ts`.
+- Shared security helpers in `src/lib/security.ts`.
 - Environment helpers in `src/lib/env.ts`.
 - Reusable UI primitives in `src/components/ui.tsx`.
+- Strict TypeScript build validation is enabled; production builds no longer ignore type errors.
 - Existing API routes preserved with more consistent responses.
 
 ## Verification
@@ -103,5 +108,5 @@ Latest local verification:
 
 - `npm.cmd run lint`: passed.
 - `npm.cmd run build`: passed with a native Windows SWC warning and fallback.
-- `npm.cmd run test -- --runInBand`: passed, 9 suites and 35 tests.
+- `npm.cmd run test`: passed, 9 suites and 37 tests.
 - `npm.cmd run test:e2e`: passed, 11 Playwright tests.

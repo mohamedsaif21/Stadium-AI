@@ -9,6 +9,21 @@ interface AuthResult {
   error: string | null;
 }
 
+export function isUserRole(value: unknown): value is UserRole {
+  return value === 'fan' || value === 'volunteer' || value === 'admin';
+}
+
+export function isUser(value: unknown): value is User {
+  if (!value || typeof value !== 'object') return false;
+  const candidate = value as Partial<User>;
+  return (
+    typeof candidate.id === 'string' &&
+    typeof candidate.email === 'string' &&
+    typeof candidate.name === 'string' &&
+    isUserRole(candidate.role)
+  );
+}
+
 export async function loginUser(email: string, password: string): Promise<AuthResult> {
   if (MOCK_MODE) {
     const user = MOCK_USERS.find(u => u.email === email);

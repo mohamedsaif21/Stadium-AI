@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodError, ZodSchema } from 'zod';
 import { UserRole } from './types';
+import { isSameOrigin } from './security';
 
-type ApiPayload = Record<string, unknown> | unknown[];
+type ApiPayload = object;
 
 const rateLimitStore = new Map<string, number[]>();
 
@@ -40,6 +41,10 @@ export function requireRole(request: NextRequest, allowed: UserRole[]) {
     return fail('Forbidden', 403, 'FORBIDDEN');
   }
   return null;
+}
+
+export function requireSameOrigin(request: NextRequest) {
+  return isSameOrigin(request.headers) ? null : fail('Forbidden', 403, 'FORBIDDEN');
 }
 
 export function rateLimit(request: NextRequest, scope: string, limit: number, windowMs = 60_000) {

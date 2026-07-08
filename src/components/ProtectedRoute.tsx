@@ -2,6 +2,7 @@
 
 import { useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
+import { isUser } from '@/lib/auth';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -19,10 +20,12 @@ export function ProtectedRoute({ children, role }: ProtectedRouteProps) {
     }
     try {
       const user = JSON.parse(stored);
-      if (user.role !== role) {
+      if (!isUser(user) || user.role !== role) {
+        localStorage.removeItem('stadiumai_user');
         router.push('/login');
       }
     } catch {
+      localStorage.removeItem('stadiumai_user');
       router.push('/login');
     }
   }, [role, router]);
@@ -37,6 +40,6 @@ export function ProtectedRoute({ children, role }: ProtectedRouteProps) {
     return null;
   }
 
-  if (!parsedUser || parsedUser.role !== role) return null;
+  if (!isUser(parsedUser) || parsedUser.role !== role) return null;
   return <>{children}</>;
 }

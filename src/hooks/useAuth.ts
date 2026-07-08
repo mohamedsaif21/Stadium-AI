@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { User } from '@/lib/types';
+import { isUser } from '@/lib/auth';
 
 export function useAuth() {
   const router = useRouter();
@@ -14,7 +15,11 @@ export function useAuth() {
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
-        setUser(parsed);
+        if (isUser(parsed)) {
+          setUser(parsed);
+        } else {
+          localStorage.removeItem('stadiumai_user');
+        }
       } catch {
         localStorage.removeItem('stadiumai_user');
       }

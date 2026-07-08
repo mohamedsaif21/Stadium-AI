@@ -1,4 +1,4 @@
-import { loginUser, getRedirectPath, isMockMode } from '@/lib/auth';
+import { loginUser, getRedirectPath, isMockMode, isUser } from '@/lib/auth';
 
 describe('Auth Module', () => {
   it('logs in fan user', async () => {
@@ -37,5 +37,11 @@ describe('Auth Module', () => {
     delete process.env.NEXT_PUBLIC_SUPABASE_URL;
     expect(isMockMode()).toBe(true);
     process.env.NEXT_PUBLIC_SUPABASE_URL = original;
+  });
+
+  it('rejects malformed stored user objects', () => {
+    expect(isUser({ id: '1', email: 'a@b.com', name: 'Fan', role: 'fan' })).toBe(true);
+    expect(isUser({ id: '1', email: 'a@b.com', name: 'Fan', role: 'superadmin' })).toBe(false);
+    expect(isUser({ role: 'admin' })).toBe(false);
   });
 });

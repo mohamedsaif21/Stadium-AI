@@ -118,7 +118,7 @@ export async function getAIResponse(message: string, role: UserRole): Promise<AI
       responseText = sanitizeAIText(result.response.text());
     } else {
       const OpenAI = (await import('openai')).default;
-      const openai = new OpenAI({ apiKey, baseURL: provider === 'azure' ? undefined : undefined });
+      const openai = new OpenAI({ apiKey });
       const completion = await openai.chat.completions.create({
         model: 'gpt-4o-mini',
         messages: [

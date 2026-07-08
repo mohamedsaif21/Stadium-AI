@@ -10,11 +10,13 @@ StadiumAI is a GenAI Matchday Operations Assistant for FIFA World Cup 2026 stadi
 
 - Added shared Zod schemas in `src/lib/schemas.ts`.
 - Added shared API helpers in `src/lib/api.ts` for success responses, errors, JSON parsing, role checks, and rate limiting.
+- Added shared security helpers in `src/lib/security.ts`.
 - Added environment helpers in `src/lib/env.ts`.
 - Added reusable UI primitives in `src/components/ui.tsx`.
 - Replaced duplicated inline validation and rate-limit logic in API routes.
 - Preserved existing endpoint routes and response fields while adding a consistent `ok` flag.
 - Fixed the admin simulator incident payload so it satisfies validated API input.
+- Re-enabled strict TypeScript build validation by removing build-error suppression.
 
 ### Security
 
@@ -22,7 +24,10 @@ StadiumAI is a GenAI Matchday Operations Assistant for FIFA World Cup 2026 stadi
 - Added safe AI provider fallback and prompt-injection refusal checks.
 - Sanitized AI provider output before returning it to the client.
 - Standardized secure error responses without stack traces.
-- Enforced role checks on protected write APIs.
+- Enforced role checks on protected operational read and write APIs.
+- Added same-origin checks to mutating APIs.
+- Added security headers for CSP, frame blocking, content sniffing protection, referrer policy, and browser permissions.
+- Added runtime validation for locally stored demo user objects.
 - Kept demo/mock mode operational when Supabase or AI keys are missing.
 
 ### UI/UX and Accessibility
@@ -35,6 +40,8 @@ StadiumAI is a GenAI Matchday Operations Assistant for FIFA World Cup 2026 stadi
 ### Testing
 
 - Updated API validation tests to use the production schemas.
+- Added tests for same-origin request protection.
+- Added tests for stored user object validation.
 - Added an AI safety test for prompt-injection fallback behavior.
 - Verified lint, build, Jest, and Playwright E2E suites.
 
@@ -82,3 +89,4 @@ npm.cmd run test:e2e
 - Replace demo role headers with verified Supabase session claims.
 - Add persistent storage for incidents and alerts.
 - Move in-memory rate limiting to Redis or another shared store for multi-instance deployments.
+- Add production audit logging for incident and alert changes.

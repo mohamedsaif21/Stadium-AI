@@ -1,16 +1,25 @@
 import { NextRequest } from 'next/server';
 import { MOCK_ALERTS } from '@/lib/mock-data';
 import { Alert } from '@/lib/types';
-import { fail, ok, parseJson, requireRole, validationMessage } from '@/lib/api';
+import { fail, ok, parseJson, rateLimit, requireRole, requireSameOrigin, validationMessage } from '@/lib/api';
 import { alertCreateSchema } from '@/lib/schemas';
 
 const alerts = [...MOCK_ALERTS];
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const limited = rateLimit(request, 'alerts-read', 60);
+  if (limited) return limited;
+  const forbidden = requireRole(request, ['admin']);
+  if (forbidden) return forbidden;
   return ok({ alerts });
 }
 
 export async function POST(request: NextRequest) {
+  const limited = rateLimit(request, 'alerts-write', 20);
+  if (limited) return limited;
+  const invalidOrigin = requireSameOrigin(request);
+  if (invalidOrigin) return invalidOrigin;
+
   try {
     const forbidden = requireRole(request, ['admin']);
     if (forbidden) return forbidden;

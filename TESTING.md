@@ -24,6 +24,8 @@ npm.cmd run test:e2e
 - Login and mock auth redirects.
 - Role-specific dashboard access.
 - API validation schemas for chat, incidents, alerts, and updates.
+- Same-origin request protection helper.
+- Demo auth object shape validation.
 - Navigation search behavior.
 - Incident submission and status handling.
 - Admin dashboard rendering.
@@ -35,7 +37,7 @@ npm.cmd run test:e2e
 
 - `npm.cmd run lint`: passed.
 - `npm.cmd run build`: passed. Next emitted a native Windows SWC warning and used its fallback path.
-- `npm.cmd run test -- --runInBand`: passed, 9 suites and 35 tests.
+- `npm.cmd run test`: passed, 9 suites and 37 tests.
 - `npm.cmd run test:e2e`: passed, 11 Playwright tests.
 
 The Playwright config starts the dev server automatically.
