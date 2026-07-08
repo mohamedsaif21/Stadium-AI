@@ -1,3 +1,7 @@
+'use client';
+
+import { motion } from 'framer-motion';
+
 interface StatCardProps {
   label: string;
   value: string | number;
@@ -27,7 +31,13 @@ export function StatCard({ label, value, icon, trend, color = 'blue' }: StatCard
   const styles = colorClasses[color] || colorClasses.blue;
 
   return (
-    <div className="ops-surface rounded-lg p-5 hover-lift">
+    <motion.div
+      className="ops-surface p-5 hover-lift border-l-4 border-l-blue-600"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -4, scale: 1.01 }}
+      transition={{ duration: 0.22 }}
+    >
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-1">
           <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">{label}</p>
@@ -45,6 +55,6 @@ export function StatCard({ label, value, icon, trend, color = 'blue' }: StatCard
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }

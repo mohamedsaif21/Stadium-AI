@@ -1,22 +1,30 @@
 import { ComponentPropsWithoutRef, ReactNode } from 'react';
 
 type ButtonProps = ComponentPropsWithoutRef<'button'> & {
-  variant?: 'primary' | 'success' | 'danger' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'outline' | 'success' | 'danger' | 'ghost';
+  loading?: boolean;
 };
 
 const buttonVariants = {
-  primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 shadow-md shadow-blue-600/15',
-  success: 'bg-green-600 text-white hover:bg-green-700 focus:ring-green-500 shadow-md shadow-green-600/15',
-  danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 shadow-md shadow-red-600/15',
+  primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 shadow-md shadow-blue-600/20',
+  secondary: 'bg-navy-900 text-white hover:bg-navy-800 focus:ring-navy-900 shadow-md shadow-navy-950/15',
+  outline: 'bg-white text-navy-900 hover:bg-gray-50 focus:ring-blue-500 border border-gray-200 shadow-sm',
+  success: 'bg-green-600 text-white hover:bg-green-700 focus:ring-green-500 shadow-md shadow-green-600/20',
+  danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 shadow-md shadow-red-600/20',
   ghost: 'bg-white/10 text-white hover:bg-white/20 focus:ring-white border border-white/10',
 };
 
-export function Button({ className = '', variant = 'primary', ...props }: ButtonProps) {
+export function Button({ className = '', variant = 'primary', loading = false, children, disabled, ...props }: ButtonProps) {
   return (
     <button
-      className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:scale-100 focus:outline-none focus:ring-2 ${buttonVariants[variant]} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 disabled:translate-y-0 focus:outline-none focus:ring-2 focus:ring-offset-2 ${buttonVariants[variant]} ${className}`}
+      disabled={disabled || loading}
+      aria-busy={loading || undefined}
       {...props}
-    />
+    >
+      {loading && <span className="h-3.5 w-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" aria-hidden="true" />}
+      {children}
+    </button>
   );
 }
 
@@ -36,7 +44,7 @@ export function Input({ label, error, id, className = '', ...props }: FieldProps
         id={inputId}
         aria-invalid={Boolean(error)}
         aria-describedby={error ? `${inputId}-error` : undefined}
-        className={`w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all bg-gray-50/50 hover:bg-gray-50 focus:bg-white ${className}`}
+        className={`w-full px-4 py-3 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all bg-gray-50/50 hover:bg-gray-50 focus:bg-white disabled:cursor-not-allowed disabled:opacity-60 ${className}`}
         {...props}
       />
       {error && <p id={`${inputId}-error`} className="mt-1.5 text-xs font-semibold text-red-700">{error}</p>}
@@ -52,14 +60,16 @@ export function Badge({ children, tone = 'blue' }: { children: ReactNode; tone?:
     red: 'bg-red-50 text-red-700',
     gray: 'bg-gray-100 text-gray-700',
   };
-  return <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold uppercase ${tones[tone]}`}>{children}</span>;
+  return <span className={`status-pill ${tones[tone]}`}>{children}</span>;
 }
 
 export function EmptyState({ title, description }: { title: string; description?: string }) {
   return (
-    <div className="flex flex-col items-center justify-center p-8 bg-white rounded-xl border border-dashed border-gray-200 text-center">
+    <div className="flex flex-col items-center justify-center p-8 bg-white rounded-2xl border border-dashed border-gray-200 text-center">
       <div className="w-9 h-9 rounded-full bg-green-50 text-green-600 flex items-center justify-center mb-3" aria-hidden="true">
-        <span className="text-lg">✓</span>
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.25} d="m5 13 4 4L19 7" />
+        </svg>
       </div>
       <p className="text-gray-700 text-sm font-semibold">{title}</p>
       {description && <p className="text-gray-500 text-xs mt-1 leading-relaxed">{description}</p>}

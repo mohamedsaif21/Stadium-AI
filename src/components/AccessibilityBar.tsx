@@ -4,16 +4,36 @@ import { useState } from 'react';
 import { useAccessibility } from './AccessibilityProvider';
 
 export function AccessibilityBar() {
-  const { highContrast, largeText, toggleHighContrast, toggleLargeText } = useAccessibility();
+  const { highContrast, largeText, theme, toggleHighContrast, toggleLargeText, toggleTheme } = useAccessibility();
   const [open, setOpen] = useState(false);
+  const isDark = theme === 'dark';
 
   return (
     <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2" role="toolbar" aria-label="Accessibility controls">
       {open && (
-        <div className="bg-navy-900 border border-white/10 rounded-xl p-2.5 shadow-2xl flex flex-col gap-1.5 glass-panel mr-1">
+        <div className="bg-navy-900 border border-white/10 rounded-lg p-2.5 shadow-2xl flex flex-col gap-1.5 glass-panel mr-1 min-w-40">
+          <button
+            onClick={toggleTheme}
+            className={`flex items-center gap-2 px-3 py-2 rounded-md text-xs font-semibold w-full transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              isDark ? 'bg-blue-500 text-white shadow-md' : 'text-white hover:bg-white/5'
+            }`}
+            aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
+            aria-pressed={isDark}
+          >
+            {isDark ? (
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.36-6.36-1.42 1.42M7.05 16.95l-1.41 1.41m12.72 0-1.42-1.41M7.05 7.05 5.64 5.64M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0z" />
+              </svg>
+            ) : (
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+              </svg>
+            )}
+            {isDark ? 'Light Mode' : 'Dark Mode'}
+          </button>
           <button
             onClick={toggleHighContrast}
-            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold w-full transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            className={`flex items-center gap-2 px-3 py-2 rounded-md text-xs font-semibold w-full transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               highContrast ? 'bg-yellow-400 text-black shadow-md' : 'text-white hover:bg-white/5'
             }`}
             aria-label={`${highContrast ? 'Disable' : 'Enable'} high contrast mode`}
@@ -26,7 +46,7 @@ export function AccessibilityBar() {
           </button>
           <button
             onClick={toggleLargeText}
-            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold w-full transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            className={`flex items-center gap-2 px-3 py-2 rounded-md text-xs font-semibold w-full transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               largeText ? 'bg-yellow-400 text-black shadow-md' : 'text-white hover:bg-white/5'
             }`}
             aria-label={`${largeText ? 'Disable' : 'Enable'} large text mode`}
@@ -42,7 +62,7 @@ export function AccessibilityBar() {
       <button
         onClick={() => setOpen(!open)}
         className="p-3.5 rounded-full shadow-lg bg-blue-600 text-white hover:bg-blue-700 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-center hover:scale-105 active:scale-95"
-        aria-label="Accessibility options menu"
+        aria-label="Display and accessibility settings"
         aria-expanded={open}
       >
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

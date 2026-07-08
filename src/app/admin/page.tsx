@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { Chatbot } from '@/components/Chatbot';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
@@ -21,6 +21,8 @@ export default function AdminDashboard() {
   const [alertError, setAlertError] = useState('');
   const [alertSuccess, setAlertSuccess] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [incidentSearch, setIncidentSearch] = useState('');
+  const [incidentPage, setIncidentPage] = useState(1);
 
   const fetchData = async () => {
     try {
@@ -130,6 +132,21 @@ export default function AdminDashboard() {
   };
 
   const openIncidents = incidents.filter(i => i.status === 'open' || i.status === 'in_progress');
+  const filteredIncidents = useMemo(() => {
+    const query = incidentSearch.trim().toLowerCase();
+    if (!query) return incidents;
+    return incidents.filter(incident =>
+      [incident.title, incident.location, incident.type, incident.severity, incident.status]
+        .some(value => value.toLowerCase().includes(query))
+    );
+  }, [incidents, incidentSearch]);
+  const pageSize = 5;
+  const totalPages = Math.max(1, Math.ceil(filteredIncidents.length / pageSize));
+  const incidentPageItems = filteredIncidents.slice((incidentPage - 1) * pageSize, incidentPage * pageSize);
+
+  useEffect(() => {
+    setIncidentPage(1);
+  }, [incidentSearch]);
 
   if (loading) {
     return (
@@ -160,7 +177,7 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-between flex-wrap gap-3">
               <div>
                 <h2 className="text-sm font-bold uppercase tracking-wider flex items-center gap-1.5 text-indigo-300">
-                  <span>⚡</span> Judge Simulation Deck
+                  <span className="h-2 w-2 rounded-full bg-indigo-300 shadow-md shadow-indigo-300/40" /> Judge Simulation Deck
                 </h2>
                 <p className="text-xs text-blue-200/80 font-light mt-0.5">Click any scenario to inject real-time incidents and evaluate AI/Operations reaction telemetry.</p>
               </div>
@@ -169,25 +186,25 @@ export default function AdminDashboard() {
                   onClick={() => triggerSimulation('crowd_surge')}
                   className="bg-white/10 hover:bg-white/20 text-white text-xs font-semibold px-3 py-2 rounded-md transition-all hover:-translate-y-0.5 active:translate-y-0 border border-white/10"
                 >
-                  🚨 Gate B Surge
+                  Gate B Surge
                 </button>
                 <button
                   onClick={() => triggerSimulation('medical')}
                   className="bg-white/10 hover:bg-white/20 text-white text-xs font-semibold px-3 py-2 rounded-md transition-all hover:-translate-y-0.5 active:translate-y-0 border border-white/10"
                 >
-                  🚑 Food Court Heat
+                  Food Court Heat
                 </button>
                 <button
                   onClick={() => triggerSimulation('power')}
                   className="bg-white/10 hover:bg-white/20 text-white text-xs font-semibold px-3 py-2 rounded-md transition-all hover:-translate-y-0.5 active:translate-y-0 border border-white/10"
                 >
-                  🔌 Stand 2 Power Cut
+                  Stand 2 Power Cut
                 </button>
                 <button
                   onClick={() => triggerSimulation('post_match')}
                   className="bg-white/10 hover:bg-white/20 text-white text-xs font-semibold px-3 py-2 rounded-md transition-all hover:-translate-y-0.5 active:translate-y-0 border border-white/10"
                 >
-                  🚇 Post-Match Exit
+                  Post-Match Exit
                 </button>
               </div>
             </div>
@@ -247,7 +264,7 @@ export default function AdminDashboard() {
                       AI Optimization Tips
                     </p>
                     {sustainability.suggestions.map((s, i) => (
-                      <p key={i} className="text-xs text-green-700/90 leading-relaxed mb-1.5 last:mb-0 font-medium">• {s}</p>
+                      <p key={i} className="text-xs text-green-700/90 leading-relaxed mb-1.5 last:mb-0 font-medium">- {s}</p>
                     ))}
                   </div>
                 </div>
@@ -325,7 +342,7 @@ export default function AdminDashboard() {
                         a.severity === 'critical' ? 'text-red-600' :
                         a.severity === 'warning' ? 'text-yellow-600' : 'text-blue-600'
                       }`}>{a.severity}</span>
-                      <span className="text-[10px] text-gray-400 font-medium font-mono">• {a.zone}</span>
+                      <span className="text-[10px] text-gray-400 font-medium font-mono">/ {a.zone}</span>
                     </div>
                     <h3 className="font-bold text-navy-900 text-sm mb-0.5">{a.title}</h3>
                     <p className="text-xs text-gray-500 leading-relaxed">{a.message}</p>
@@ -359,7 +376,7 @@ export default function AdminDashboard() {
                         'bg-yellow-50 text-yellow-600'
                       }`}>{inc.severity}</span>
                     </div>
-                    <p className="text-[10px] font-semibold text-gray-400 font-mono">{inc.location} • {inc.type.replace('_', ' ')}</p>
+                    <p className="text-[10px] font-semibold text-gray-400 font-mono">{inc.location} / {inc.type.replace('_', ' ')}</p>
                   </div>
                 ))}
                 {incidents.length === 0 && (
@@ -374,6 +391,99 @@ export default function AdminDashboard() {
 
               <div className="h-[380px]">
                 <Chatbot role="admin" />
+              </div>
+            </div>
+          </div>
+
+          <div className="ops-surface overflow-hidden mb-8">
+            <div className="p-5 border-b border-gray-200/80 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <p className="ops-kicker mb-2">Incident registry</p>
+                <h2 className="text-lg font-bold text-navy-900 tracking-tight">Operations Table</h2>
+              </div>
+              <label className="relative w-full sm:w-80">
+                <span className="sr-only">Search incidents</span>
+                <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m21 21-4.35-4.35M10.5 18a7.5 7.5 0 100-15 7.5 7.5 0 000 15z" />
+                </svg>
+                <input
+                  value={incidentSearch}
+                  onChange={event => setIncidentSearch(event.target.value)}
+                  placeholder="Search title, zone, status..."
+                  className="w-full rounded-2xl border border-gray-200 bg-gray-50/70 py-2.5 pl-9 pr-3 text-sm text-navy-900 outline-none transition-all hover:bg-white focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500"
+                />
+              </label>
+            </div>
+            <div className="max-h-[420px] overflow-auto custom-scrollbar">
+              <table className="enterprise-table">
+                <thead>
+                  <tr>
+                    <th>Incident</th>
+                    <th>Zone</th>
+                    <th>Severity</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {incidentPageItems.map(incident => (
+                    <tr key={incident.id}>
+                      <td>
+                        <div className="font-bold text-navy-900">{incident.title}</div>
+                        <div className="text-[11px] text-gray-400 font-mono mt-0.5">{incident.type.replace('_', ' ')}</div>
+                      </td>
+                      <td>{incident.location}</td>
+                      <td>
+                        <span className={`status-pill ${
+                          incident.severity === 'critical' ? 'bg-red-50 text-red-700' :
+                          incident.severity === 'high' ? 'bg-orange-50 text-orange-700' :
+                          incident.severity === 'medium' ? 'bg-yellow-50 text-yellow-700' :
+                          'bg-green-50 text-green-700'
+                        }`}>
+                          <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                          {incident.severity}
+                        </span>
+                      </td>
+                      <td>
+                        <span className={`status-pill ${
+                          incident.status === 'resolved' ? 'bg-green-50 text-green-700' :
+                          incident.status === 'in_progress' ? 'bg-blue-50 text-blue-700' :
+                          'bg-yellow-50 text-yellow-700'
+                        }`}>
+                          {incident.status.replace('_', ' ')}
+                        </span>
+                      </td>
+                      <td className="font-mono text-[11px]">{new Date(incident.createdAt).toLocaleString()}</td>
+                    </tr>
+                  ))}
+                  {incidentPageItems.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="text-center text-gray-400 py-10 font-semibold">No incidents match this search.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+            <div className="p-4 border-t border-gray-200/80 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <p className="text-xs text-gray-500 font-semibold">
+                Showing {incidentPageItems.length} of {filteredIncidents.length} incidents
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setIncidentPage(page => Math.max(1, page - 1))}
+                  disabled={incidentPage === 1}
+                  className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-bold text-gray-600 transition-all hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  Previous
+                </button>
+                <span className="text-xs font-bold text-gray-500 px-2">Page {incidentPage} / {totalPages}</span>
+                <button
+                  onClick={() => setIncidentPage(page => Math.min(totalPages, page + 1))}
+                  disabled={incidentPage === totalPages}
+                  className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-bold text-gray-600 transition-all hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  Next
+                </button>
               </div>
             </div>
           </div>

@@ -53,7 +53,7 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100/90 hover:shadow-2xl transition-all">
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm flex items-center gap-2" role="alert">
-                <span>⚠</span> {error}
+                <span className="font-bold">!</span> {error}
               </div>
             )}
 

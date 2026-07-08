@@ -3,7 +3,9 @@
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { FeatureCard } from '@/components/FeatureCard';
+import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
 const features = [
   {
@@ -44,15 +46,78 @@ const liveSignals = [
   ['Water Stations', '45% refill use'],
 ];
 
+const tournamentStats = [
+  { value: 104, suffix: '', label: 'Matches' },
+  { value: 48, suffix: '', label: 'Teams' },
+  { value: 16, suffix: '', label: 'Host Cities' },
+  { value: 6, suffix: 'M+', label: 'Fans Served' },
+];
+
+const matchdayStatus = [
+  { status: 'normal', label: 'Gate A Normal', tone: 'bg-green-500' },
+  { status: 'busy', label: 'Gate B Busy', tone: 'bg-yellow-500' },
+  { status: 'crowded', label: 'Metro Exit Crowded', tone: 'bg-red-500' },
+  { status: 'ready', label: 'Medical Team Ready', tone: 'bg-green-500' },
+  { status: 'active', label: 'AI Monitoring Active', tone: 'bg-green-500' },
+];
+
+function CounterStat({ value, suffix, label }: { value: number; suffix: string; label: string }) {
+  const [displayValue, setDisplayValue] = useState(0);
+
+  useEffect(() => {
+    let frame = 0;
+    const totalFrames = 42;
+    const timer = window.setInterval(() => {
+      frame += 1;
+      const progress = 1 - Math.pow(1 - frame / totalFrames, 3);
+      setDisplayValue(Math.round(value * progress));
+      if (frame >= totalFrames) {
+        window.clearInterval(timer);
+        setDisplayValue(value);
+      }
+    }, 22);
+    return () => window.clearInterval(timer);
+  }, [value]);
+
+  return (
+    <motion.div
+      className="ops-surface text-center p-6 hover-lift"
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.45 }}
+    >
+      <motion.p
+        className="text-4xl font-black text-blue-700 mb-1 tracking-tight"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+      >
+        {displayValue}{suffix}
+      </motion.p>
+      <p className="text-gray-500 font-semibold text-xs uppercase tracking-wider">{label}</p>
+    </motion.div>
+  );
+}
+
 export default function Home() {
   return (
     <>
       <Navbar />
       <main>
         <section className="ops-shell text-white overflow-hidden border-b border-white/10 min-h-[680px] flex items-end">
-          <div className="stadium-scene hidden md:block" aria-hidden="true" />
+          <div className="stadium-scene hidden md:block" aria-hidden="true">
+            <svg className="stadium-routes" viewBox="0 0 720 465">
+              <path d="M90 110 C220 70 330 150 480 88 S650 116 690 70" stroke="rgba(96, 165, 250, 0.72)" strokeWidth="3" />
+              <path d="M70 310 C180 240 270 330 405 250 S570 225 670 340" stroke="rgba(34, 197, 94, 0.62)" strokeWidth="3" />
+              <path d="M145 388 C250 315 355 385 505 300" stroke="rgba(250, 204, 21, 0.58)" strokeWidth="2.5" />
+            </svg>
+          </div>
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16 w-full">
-            <div className="max-w-3xl">
+            <motion.div
+              className="max-w-3xl"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.55, ease: 'easeOut' }}
+            >
               <div className="ops-kicker mb-7">Live matchday command layer</div>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-tight mb-6 tracking-tight">
                 StadiumAI
@@ -75,13 +140,60 @@ export default function Home() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-12 max-w-2xl">
                 {liveSignals.map(([label, value]) => (
-                  <div key={label} className="ops-panel-dark rounded-lg p-4">
+                  <div key={label} className="ops-panel-dark p-4 animate-shimmer">
                     <p className="text-[10px] uppercase font-bold text-blue-300 mb-1">{label}</p>
                     <p className="text-sm font-semibold text-white">{value}</p>
                   </div>
                 ))}
               </div>
+            </motion.div>
+          </div>
+        </section>
+
+        <section className="py-20 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              {tournamentStats.map(stat => (
+                <CounterStat key={stat.label} {...stat} />
+              ))}
             </div>
+          </div>
+        </section>
+
+        <section className="py-20 bg-gray-50 border-y border-gray-200/70">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-end justify-between gap-6 flex-wrap mb-8">
+              <div>
+                <p className="ops-kicker mb-3">Live matchday status</p>
+                <h2 className="text-2xl sm:text-3xl font-bold text-navy-900 tracking-tight">Operations Health</h2>
+              </div>
+              <div className="hidden sm:flex items-center gap-2 text-xs text-gray-500 font-semibold">
+                <span className="w-2 h-2 rounded-full bg-green-500 ai-pulse" />
+                AI pulse synced 12s ago
+              </div>
+            </div>
+            <motion.div
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4"
+              initial="hidden"
+              animate="show"
+              variants={{ hidden: {}, show: { transition: { staggerChildren: 0.08 } } }}
+            >
+              {matchdayStatus.map(item => (
+                <motion.div
+                  key={item.label}
+                  className="ops-surface p-5 hover-lift border-l-4 border-l-blue-600"
+                  variants={{ hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } }}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className={`w-3 h-3 rounded-full ${item.tone} shadow-md`} aria-hidden="true" />
+                    <div>
+                      <p className="text-sm font-bold text-navy-900">{item.label}</p>
+                      <p className="text-[10px] uppercase tracking-wider text-gray-400 font-bold">{item.status}</p>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
           </div>
         </section>
 
@@ -101,7 +213,7 @@ export default function Home() {
                 { num: '3', label: 'Host countries' },
                 { num: '104', label: 'Total matches' },
               ].map(item => (
-                <div key={item.label} className="ops-surface text-center p-8 rounded-lg hover-lift">
+                <div key={item.label} className="ops-surface text-center p-8 hover-lift">
                   <p className="text-5xl font-extrabold text-blue-700 mb-2.5">{item.num}</p>
                   <p className="text-gray-500 font-semibold text-xs uppercase tracking-wider">{item.label}</p>
                 </div>
@@ -139,17 +251,17 @@ export default function Home() {
               </Link>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-sm text-blue-200/80">
-              <div className="ops-panel-dark rounded-lg p-6 text-left">
+              <div className="ops-panel-dark p-6 text-left">
                 <p className="font-semibold text-white mb-2 text-xs uppercase tracking-wider flex items-center gap-1.5"><span className="w-2 h-2 bg-blue-500 rounded-full" />Fan Access</p>
                 <p className="font-mono text-xs opacity-90">Email: fan@stadiumai.demo</p>
                 <p className="font-mono text-xs opacity-90 mt-0.5">Pass: password123</p>
               </div>
-              <div className="ops-panel-dark rounded-lg p-6 text-left">
+              <div className="ops-panel-dark p-6 text-left">
                 <p className="font-semibold text-white mb-2 text-xs uppercase tracking-wider flex items-center gap-1.5"><span className="w-2 h-2 bg-green-500 rounded-full" />Volunteer Access</p>
                 <p className="font-mono text-xs opacity-90">Email: volunteer@stadiumai.demo</p>
                 <p className="font-mono text-xs opacity-90 mt-0.5">Pass: password123</p>
               </div>
-              <div className="ops-panel-dark rounded-lg p-6 text-left">
+              <div className="ops-panel-dark p-6 text-left">
                 <p className="font-semibold text-white mb-2 text-xs uppercase tracking-wider flex items-center gap-1.5"><span className="w-2 h-2 bg-blue-300 rounded-full" />Admin Access</p>
                 <p className="font-mono text-xs opacity-90">Email: admin@stadiumai.demo</p>
                 <p className="font-mono text-xs opacity-90 mt-0.5">Pass: password123</p>

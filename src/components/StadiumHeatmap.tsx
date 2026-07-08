@@ -26,16 +26,16 @@ interface ZoneDetail {
 
 function getZoneDetails(name: string, layer: 'crowd' | 'thermal' | 'staff'): ZoneDetail {
   const metrics: Record<string, { crowd: string; temp: string; staff: string }> = {
-    'Gate A': { crowd: '34%', temp: '22°C', staff: '2' },
-    'Gate B': { crowd: '94%', temp: '26°C', staff: '4' },
-    'Gate C': { crowd: '45%', temp: '23°C', staff: '2' },
-    'Food Court': { crowd: '78%', temp: '28°C', staff: '3' },
-    'Metro Exit': { crowd: '88%', temp: '24°C', staff: '2' },
-    'Stand 1': { crowd: '65%', temp: '23°C', staff: '2' },
-    'Stand 2': { crowd: '42%', temp: '25°C', staff: '1' },
+    'Gate A': { crowd: '34%', temp: '22C', staff: '2' },
+    'Gate B': { crowd: '94%', temp: '26C', staff: '4' },
+    'Gate C': { crowd: '45%', temp: '23C', staff: '2' },
+    'Food Court': { crowd: '78%', temp: '28C', staff: '3' },
+    'Metro Exit': { crowd: '88%', temp: '24C', staff: '2' },
+    'Stand 1': { crowd: '65%', temp: '23C', staff: '2' },
+    'Stand 2': { crowd: '42%', temp: '25C', staff: '1' },
   };
 
-  const current = metrics[name] || { crowd: '50%', temp: '24°C', staff: '1' };
+  const current = metrics[name] || { crowd: '50%', temp: '24C', staff: '1' };
 
   if (layer === 'crowd') {
     const crowdVal = parseFloat(current.crowd);
@@ -87,7 +87,7 @@ export function StadiumHeatmap() {
       </div>
 
       <div className="overflow-x-auto custom-scrollbar">
-        <div className="relative min-w-[360px] h-[220px] bg-slate-905 bg-[#0a1120] rounded-2xl overflow-hidden border border-slate-800 shadow-inner flex items-center justify-center p-4">
+        <div className="relative min-w-[360px] h-[220px] bg-[#0a1120] rounded-2xl overflow-hidden border border-slate-800 shadow-inner flex items-center justify-center p-4">
           {/* Pitch outline in center */}
           <div className="w-[110px] h-[65px] border border-green-500/20 rounded-md bg-green-950/5 flex items-center justify-center relative">
             <div className="absolute inset-y-0 left-1/2 border-l border-green-500/20" />
