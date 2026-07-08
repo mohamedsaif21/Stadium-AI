@@ -10,7 +10,7 @@ No official FIFA logos or copyrighted assets are used.
 - Volunteer dashboard with SOP cards, incident reporting, and AI support.
 - Admin dashboard with alerts, incident telemetry, sustainability metrics, scenario simulation, and crowd heatmap.
 - Accessibility controls for high contrast and large text.
-- Safe mock/demo mode when Supabase or AI provider keys are missing.
+- Safe mock/demo mode when Supabase on work or AI provider keys are missing.
 
 ## Tech Stack
 
